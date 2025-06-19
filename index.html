@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشغل فيديو متقدم</title>
+    
+    <!-- استدعاء مكتبة hls.js من الـ CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    
+    <!-- تصميم احترافي ومخصص للصفحة والمشغل -->
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        .player-container {
+            width: 90%;
+            max-width: 960px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            background-color: #000;
+        }
+        video {
+            width: 100%;
+            border-radius: 12px;
+        }
+        h1 {
+            margin-bottom: 2rem;
+            color: #e0e0e0;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>مشغل القناة (محاولة متقدمة)</h1>
+
+    <div class="player-container">
+        <video id="video" controls></video>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const videoSrc = 'https://dokko1new.newkso.ru/dokko1/premium92/mono.m3u8';
+
+        if (Hls.isSupported()) {
+            const hls = new Hls({
+                // هنا الجزء الأهم: نعدل طلبات التحميل لإضافة الترويسات
+                xhrSetup: function(xhr, url) {
+                    // 1. إضافة ترويسة Referer (هذا يعمل في المتصفحات)
+                    xhr.setRequestHeader('Referer', 'https://lefttoplay.xyz');
+                    
+                    // 2. محاولة إضافة User-Agent (هذه المحاولة سيتم حظرها من قبل المتصفح لأسباب أمنية)
+                    // xhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36');
+                    // لقد قمت بتعطيل السطر أعلاه لأنه سيتسبب بخطأ في الكونسول ولن يعمل.
+                }
+            });
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                video.play();
+            });
+        } 
+        // fallback للمتصفحات التي تدعم HLS مباشرة (مثل Safari)
+        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoSrc;
+            video.addEventListener('loadedmetadata', function() {
+                video.play();
+            });
+        }
+    </script>
+
+</body>
+</html>
